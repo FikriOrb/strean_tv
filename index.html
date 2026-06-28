@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamVortex — World IPTV & M3U8 Player</title>
+    <meta name="description" content="Premium global IPTV streaming platform. Import M3U playlists, browse channels by category, and enjoy cinematic HLS playback.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Splash -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="#38BDF8" stroke-width="2.5"/><polygon points="19,14 36,24 19,34" fill="#38BDF8"/></svg>
+            </div>
+            <h1 class="splash-title">StreamVortex</h1>
+            <p class="splash-sub">World IPTV Platform</p>
+        </div>
+    </div>
+
+    <!-- App Shell -->
+    <div id="app" class="app-shell hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-group">
+                    <svg width="28" height="28" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" stroke="#38BDF8" stroke-width="2.5"/><polygon points="19,14 36,24 19,34" fill="#38BDF8"/></svg>
+                    <span class="logo-text">StreamVortex</span>
+                </div>
+                <button id="btn-collapse-sidebar" class="icon-btn" title="Collapse sidebar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+            </div>
+
+            <!-- Import Section -->
+            <div class="sidebar-section import-section">
+                <button id="btn-import-url" class="btn-primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg> Import URL</button>
+                <button id="btn-import-file" class="btn-secondary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Import File</button>
+                <input type="file" id="file-input" accept=".m3u,.m3u8" hidden>
+            </div>
+
+            <!-- Search -->
+            <div class="sidebar-section search-section">
+                <div class="search-box">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="search-input" placeholder="Search channels..." autocomplete="off">
+                    <span id="search-count" class="search-count hidden">0</span>
+                </div>
+            </div>
+
+            <!-- Playlist Tabs -->
+            <div class="sidebar-section tab-section">
+                <button class="tab-btn active" data-tab="groups">Groups</button>
+                <button class="tab-btn" data-tab="favorites">★ Favorites</button>
+                <button class="tab-btn" data-tab="history">History</button>
+            </div>
+
+            <!-- Channel List -->
+            <div id="channel-list-container" class="channel-list-container">
+                <div id="group-list" class="group-list"></div>
+                <div id="channel-list" class="channel-list"></div>
+                <div id="empty-state" class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <p>Import an M3U playlist to get started</p>
+                    <span class="empty-hint">Paste a URL or drag & drop a file</span>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <span id="channel-count-label" class="channel-count">0 channels</span>
+            </div>
+        </aside>
+
+        <!-- Collapsed Sidebar Toggle -->
+        <button id="btn-expand-sidebar" class="expand-sidebar-btn hidden">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content">
+            <!-- Player Area -->
+            <div id="player-wrapper" class="player-wrapper">
+                <div id="player-container" class="player-container">
+                    <video id="video-player" playsinline></video>
+                    <!-- Player Overlay -->
+                    <div id="player-overlay" class="player-overlay">
+                        <div class="player-overlay-center">
+                            <svg width="72" height="72" viewBox="0 0 48 48" fill="none" opacity="0.3"><circle cx="24" cy="24" r="22" stroke="#38BDF8" stroke-width="1.5"/><polygon points="19,14 36,24 19,34" fill="#38BDF8"/></svg>
+                            <p class="overlay-text">Select a channel to start streaming</p>
+                        </div>
+                    </div>
+                    <!-- Status Badge -->
+                    <div id="stream-status" class="stream-status hidden">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Live</span>
+                    </div>
+                    <!-- Error Overlay -->
+                    <div id="error-overlay" class="error-overlay hidden">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        <p id="error-message">Stream unavailable</p>
+                        <button id="btn-retry" class="btn-retry">Retry Connection</button>
+                    </div>
+                    <!-- Controls -->
+                    <div id="player-controls" class="player-controls">
+                        <button id="btn-play" class="ctrl-btn" title="Play/Pause (Space)">
+                            <svg class="icon-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+                            <svg class="icon-pause hidden" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                        </button>
+                        <div class="volume-group">
+                            <button id="btn-mute" class="ctrl-btn" title="Mute (M)">
+                                <svg class="icon-vol" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+                                <svg class="icon-muted hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                            </button>
+                            <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.05" value="0.8">
+                        </div>
+                        <div class="ctrl-spacer"></div>
+                        <span id="now-playing-label" class="now-playing-label"></span>
+                        <div class="ctrl-spacer"></div>
+                        <button id="btn-pip" class="ctrl-btn" title="Picture-in-Picture (P)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><rect x="11" y="9" width="9" height="7" rx="1" fill="currentColor" opacity="0.3"/></svg>
+                        </button>
+                        <button id="btn-theater" class="ctrl-btn" title="Theater Mode (T)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+                        </button>
+                        <button id="btn-fullscreen" class="ctrl-btn" title="Fullscreen (F)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- Ambient Glow -->
+                <div id="ambient-glow" class="ambient-glow"></div>
+            </div>
+
+            <!-- Metadata Section -->
+            <div id="metadata-section" class="metadata-section">
+                <div class="meta-tabs">
+                    <button class="meta-tab active" data-meta="info">Channel Info</button>
+                    <button class="meta-tab" data-meta="stream">Stream Details</button>
+                </div>
+                <div id="meta-info" class="meta-panel active">
+                    <div class="meta-channel-header">
+                        <img id="meta-logo" class="meta-logo" src="" alt="" hidden>
+                        <div>
+                            <h2 id="meta-name" class="meta-name">No Channel Selected</h2>
+                            <p id="meta-group" class="meta-group">—</p>
+                        </div>
+                        <button id="btn-fav" class="btn-fav" title="Add to Favorites">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="meta-stream" class="meta-panel">
+                    <div class="stream-stats">
+                        <div class="stat-card"><span class="stat-label">Resolution</span><span id="stat-resolution" class="stat-value">—</span></div>
+                        <div class="stat-card"><span class="stat-label">Bitrate</span><span id="stat-bitrate" class="stat-value">—</span></div>
+                        <div class="stat-card"><span class="stat-label">Buffer</span><span id="stat-buffer" class="stat-value">—</span></div>
+                        <div class="stat-card"><span class="stat-label">Latency</span><span id="stat-latency" class="stat-value">—</span></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- URL Import Modal -->
+    <div id="modal-url" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <h3>Import M3U Playlist</h3>
+            <p>Enter a URL to an M3U or M3U8 playlist file</p>
+            <input type="text" id="url-input" class="modal-input" placeholder="https://example.com/playlist.m3u" autocomplete="off">
+            <div class="modal-actions">
+                <button id="btn-modal-cancel" class="btn-secondary">Cancel</button>
+                <button id="btn-modal-load" class="btn-primary">Load Playlist</button>
+            </div>
+            <div id="import-progress" class="import-progress hidden">
+                <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+                <span id="progress-text" class="progress-text">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="default-channels.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
