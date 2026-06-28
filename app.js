@@ -530,11 +530,58 @@ class App {
         };
         this.player.onError = (msg) => {
             this.$('error-overlay').classList.remove('hidden');
-            this.$('error-message').textContent = msg || 'Stream unavailable';
             this.$('stream-status').classList.remove('hidden');
             this.$('stream-status').classList.add('offline');
             this.$('stream-status').querySelector('.status-text').textContent = 'Offline';
+            
+            // Default generic error
+            this.$('error-icon-generic').classList.remove('hidden');
+            this.$('error-icon-vpn').classList.add('hidden');
+            this.$('error-message').textContent = msg || 'Stream unavailable';
+            this.$('vpn-recommendation').classList.add('hidden');
+            
+            // Detect Geo-Block and recommend VPN
+            if (this.currentChannel) {
+                const recommendation = this._detectGeoBlock(this.currentChannel);
+                if (recommendation) {
+                    this.$('error-icon-generic').classList.add('hidden');
+                    this.$('error-icon-vpn').classList.remove('hidden');
+                    this.$('error-message').textContent = 'Channel is Geo-Blocked';
+                    this.$('vpn-recommendation').textContent = recommendation;
+                    this.$('vpn-recommendation').classList.remove('hidden');
+                    this.$('btn-retry').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg> I have connected VPN (Retry)';
+                } else {
+                    this.$('btn-retry').textContent = 'Retry Connection';
+                }
+            }
         };
+    }
+
+    /**
+     * Smart VPN Recommendation Engine
+     */
+    _detectGeoBlock(channel) {
+        const title = channel.title.toLowerCase();
+        const group = channel.group.toLowerCase();
+        
+        // Check explicit tags
+        const isGeoBlocked = title.includes('geo-blocked') || title.includes('geoblocked') || group.includes('geo-blocked');
+        
+        // Guess country from name for targeted recommendations
+        let suggestedRegion = 'the correct region';
+        
+        if (title.includes('japan') || title.includes('animax') || title.includes('nhk')) suggestedRegion = 'Japan 🇯🇵';
+        else if (title.includes('uk') || title.includes('bbc') || title.includes('itv')) suggestedRegion = 'United Kingdom 🇬🇧';
+        else if (title.includes('us') || title.includes('usa') || title.includes('cnn') || title.includes('fox')) suggestedRegion = 'United States 🇺🇸';
+        else if (title.includes('france') || title.includes('tf1')) suggestedRegion = 'France 🇫🇷';
+        else if (title.includes('korea') || title.includes('kbs') || title.includes('sbs')) suggestedRegion = 'South Korea 🇰🇷';
+        else if (title.includes('germany') || title.includes('zdf') || title.includes('ard')) suggestedRegion = 'Germany 🇩🇪';
+        
+        if (isGeoBlocked || suggestedRegion !== 'the correct region') {
+            return `Please turn on your VPN app and connect to ${suggestedRegion} to watch this channel.`;
+        }
+        
+        return null;
     }
 
     // ---- Import ----

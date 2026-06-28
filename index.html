@@ -100,10 +100,16 @@
                         <span class="status-dot"></span>
                         <span class="status-text">Live</span>
                     </div>
-                    <!-- Error Overlay -->
+                    <!-- Error / VPN Overlay -->
                     <div id="error-overlay" class="error-overlay hidden">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        <div id="error-icon-generic">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        </div>
+                        <div id="error-icon-vpn" class="hidden">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="16" r="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                        </div>
                         <p id="error-message">Stream unavailable</p>
+                        <p id="vpn-recommendation" class="vpn-hint hidden"></p>
                         <button id="btn-retry" class="btn-retry">Retry Connection</button>
                     </div>
                     <!-- Controls -->
