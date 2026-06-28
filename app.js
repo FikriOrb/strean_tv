@@ -561,8 +561,8 @@ class App {
      * Smart VPN Recommendation Engine
      */
     _detectGeoBlock(channel) {
-        const title = channel.title.toLowerCase();
-        const group = channel.group.toLowerCase();
+        const title = (channel.name || channel.title || '').toLowerCase();
+        const group = (channel.group || '').toLowerCase();
         
         // Check explicit tags
         const isGeoBlocked = title.includes('geo-blocked') || title.includes('geoblocked') || group.includes('geo-blocked');
