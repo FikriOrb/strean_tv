@@ -505,6 +505,95 @@ button { cursor: pointer; background: none; color: var(--text-primary); }
 .btn-fav.active { color: var(--warning); }
 .btn-fav.active svg { fill: var(--warning); }
 
+/* --- EPG Schedule --- */
+.epg-schedule {
+    margin-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 20px;
+    animation: fadeIn 0.3s ease;
+}
+.epg-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+.epg-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+}
+.epg-timeline::before {
+    content: '';
+    position: absolute;
+    left: 45px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: rgba(255,255,255,0.1);
+    z-index: 0;
+}
+.epg-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 0;
+    position: relative;
+    z-index: 1;
+}
+.epg-time {
+    width: 45px;
+    font-size: 13px;
+    font-family: monospace;
+    color: var(--text-dim);
+    padding-top: 2px;
+}
+.epg-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--surface-tertiary);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    margin-right: 16px;
+    margin-top: 5px;
+    transform: translateX(-4px);
+    transition: all 0.3s;
+}
+.epg-program {
+    flex: 1;
+}
+.epg-program h4 {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+}
+.epg-program p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Now Playing State */
+.epg-item.now-playing .epg-time {
+    color: var(--accent);
+    font-weight: 600;
+}
+.epg-item.now-playing .epg-dot {
+    background: var(--accent);
+    border-color: rgba(56, 189, 248, 0.3);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+.epg-item.now-playing .epg-program h4 {
+    color: #FFF;
+    font-weight: 600;
+}
+.epg-item.past {
+    opacity: 0.5;
+}
+
 /* Stream Stats */
 .stream-stats {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));

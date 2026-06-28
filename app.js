@@ -842,10 +842,81 @@ class App {
         this.$('btn-fav').classList.toggle('active', this.favorites.has(ch.url));
 
         StorageManager.addHistory(ch);
+        this._renderEPG(ch);
         this._renderChannels();
 
         // On mobile, collapse sidebar
         if (window.innerWidth <= 900) this._toggleSidebar(true);
+    }
+
+    _renderEPG(ch) {
+        const scheduleEl = this.$('epg-schedule');
+        const timelineEl = this.$('epg-timeline');
+        
+        scheduleEl.classList.remove('hidden');
+        timelineEl.innerHTML = '';
+        
+        // Generate realistic context-aware schedule based on category
+        const group = ch.group.toLowerCase();
+        let programs = [];
+        const now = new Date();
+        const currentHour = now.getHours();
+        const nextHour = (currentHour + 1) % 24;
+        const nextNextHour = (currentHour + 2) % 24;
+
+        if (group.includes('news')) {
+            programs = [
+                { time: `${currentHour}:00`, title: 'Live News Desk', desc: 'Breaking news and top stories from around the globe.', active: true },
+                { time: `${nextHour}:00`, title: 'World Business Report', desc: 'In-depth market analysis and financial updates.', active: false },
+                { time: `${nextNextHour}:00`, title: 'Global Weather & Sports', desc: 'Current conditions and sports highlights.', active: false }
+            ];
+        } else if (group.includes('sports')) {
+            programs = [
+                { time: `${currentHour}:00`, title: 'Live: Championship Match', desc: 'Current live sports coverage.', active: true },
+                { time: `${nextHour}:30`, title: 'Sports Center Analysis', desc: 'Post-match highlights and expert commentary.', active: false },
+                { time: `${nextNextHour}:30`, title: 'Classic Matches', desc: 'Replay of historic sporting events.', active: false }
+            ];
+        } else if (group.includes('movies') || group.includes('cinema')) {
+            programs = [
+                { time: `${currentHour}:00`, title: 'Action Blockbuster Movie', desc: 'High-octane thriller featuring top Hollywood stars.', active: true },
+                { time: `${currentHour + 2}:15`, title: 'Cinema Behind the Scenes', desc: 'Making of the latest box office hit.', active: false },
+                { time: `${currentHour + 3}:00`, title: 'Late Night Comedy Film', desc: 'A hilarious critically acclaimed comedy.', active: false }
+            ];
+        } else if (group.includes('kids') || group.includes('animation')) {
+            programs = [
+                { time: `${currentHour}:00`, title: 'Morning Cartoons', desc: 'Fun and educational animated adventures.', active: true },
+                { time: `${currentHour}:30`, title: 'Superhero Adventures', desc: 'Action-packed series for teenagers.', active: false },
+                { time: `${nextHour}:00`, title: 'Anime Premiere', desc: 'Latest episode of the popular series.', active: false }
+            ];
+        } else if (group.includes('music')) {
+            programs = [
+                { time: `${currentHour}:00`, title: 'Top 40 Hits Live', desc: 'The biggest trending music videos right now.', active: true },
+                { time: `${nextHour}:00`, title: 'Classic Throwbacks', desc: 'Unforgettable hits from the 90s and 2000s.', active: false },
+                { time: `${nextNextHour}:00`, title: 'Live Concert Series', desc: 'Exclusive live performance.', active: false }
+            ];
+        } else {
+            // General / Unknown
+            programs = [
+                { time: `${currentHour}:00`, title: 'Daytime Entertainment', desc: 'Popular talk show and lifestyle segments.', active: true },
+                { time: `${nextHour}:00`, title: 'Drama Series Episode 4', desc: 'Continuing the compelling story.', active: false },
+                { time: `${nextNextHour}:00`, title: 'Evening News & Updates', desc: 'Daily roundup of important events.', active: false }
+            ];
+        }
+
+        // Add to DOM
+        programs.forEach((prog, index) => {
+            const item = document.createElement('div');
+            item.className = `epg-item ${prog.active ? 'now-playing' : ''}`;
+            item.innerHTML = `
+                <div class="epg-time">${prog.time}</div>
+                <div class="epg-dot"></div>
+                <div class="epg-program">
+                    <h4>${prog.title}</h4>
+                    <p>${prog.desc}</p>
+                </div>
+            `;
+            timelineEl.appendChild(item);
+        });
     }
 
     // ---- Controls ----
